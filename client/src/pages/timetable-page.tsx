@@ -61,6 +61,25 @@ export default function TimetablePage() {
     return date.getDate();
   });
 
+  // Define studyPlan data
+  const studyPlan = [
+    { time: "7:00 AM - 8:30 AM", activity: "Review Calculus (Chapter 7)", intensity: "High", color: "#FF5252" },
+    { time: "10:00 AM - 11:00 AM", activity: "Database Systems Practice", intensity: "Medium", color: "#4CAF50" },
+    { time: "2:00 PM - 3:30 PM", activity: "AI Algorithms (Focus: Neural Networks)", intensity: "High", color: "#FF5252" },
+    { time: "6:00 PM - 7:00 PM", activity: "Language Studies Vocabulary", intensity: "Low", color: "#FFC107" },
+  ];
+
+  // Initialize study plan slots
+  useEffect(() => {
+    setStudyPlanSlots(
+      studyPlan.map(slot => ({
+        ...slot,
+        status: "idle" as TimerStatus,
+        elapsedTime: 0
+      }))
+    );
+  }, []);
+
   const { data: dayClasses, isLoading } = useQuery({
     queryKey: ["/api/classes/day", selectedDay],
     queryFn: async () => {
@@ -95,7 +114,7 @@ export default function TimetablePage() {
         updated[index] = {
           ...updated[index],
           status: "waiting",
-          startTimestamp: Date.now()
+          startTimestamp: undefined
         };
       }
       return updated;
@@ -176,23 +195,6 @@ export default function TimetablePage() {
     });
   };
 
-  const studyPlan = [
-    { time: "7:00 AM - 8:30 AM", activity: "Review Calculus (Chapter 7)", intensity: "High", color: "#FF5252" },
-    { time: "10:00 AM - 11:00 AM", activity: "Database Systems Practice", intensity: "Medium", color: "#4CAF50" },
-    { time: "2:00 PM - 3:30 PM", activity: "AI Algorithms (Focus: Neural Networks)", intensity: "High", color: "#FF5252" },
-    { time: "6:00 PM - 7:00 PM", activity: "Language Studies Vocabulary", intensity: "Low", color: "#FFC107" },
-  ];
-
-  useEffect(() => {
-    setStudyPlanSlots(
-      studyPlan.map(slot => ({
-        ...slot,
-        status: "idle" as TimerStatus,
-        elapsedTime: 0
-      }))
-    );
-  }, []);
-
   const studyGroups = [
     {
       name: "Advanced Programming",
@@ -222,7 +224,8 @@ export default function TimetablePage() {
 
   return (
     <Layout title="Timetable" subtitle="Your class schedule">
-  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-[#F5FEFD] dark:bg-[#111111]">        <div className="md:col-span-3">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="md:col-span-3">
           <motion.section
             className="mb-4"
             initial={{ opacity: 0, y: 20 }}
@@ -477,8 +480,9 @@ export default function TimetablePage() {
         </motion.div>
       </div>
 
+      {/* AI Study Planner Section */}
       <AnimatePresence>
-        {showStudyPlanner && (
+        {showStudyPlanner && studyPlanSlots.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -490,7 +494,7 @@ export default function TimetablePage() {
                 <CardTitle className="text-lg flex items-center">
                   <Brain className="mr-2 h-5 w-5 text-primary" />
                   AI-Generated Study Planner
-                  <Badge className="ml-2" variant="outline">Personalized</Badge>
+                  <Badge className="ml-2" variant="outline">Personalized for pulkit</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
@@ -511,7 +515,8 @@ export default function TimetablePage() {
                         <Clock className="h-5 w-5" />
                       </div>
                       <div className="flex-1">
-                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <h4 className="font-medium">{slot.activity}</h4>
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                           <span>{slot.time}</span>
                           <span className="mx-2">•</span>
                           <Badge variant={
@@ -590,7 +595,7 @@ export default function TimetablePage() {
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-4 text-center">
                   <span className="flex items-center justify-center">
                     <Sparkles className="h-3 w-3 mr-1 text-primary" />
-                    This plan is optimized based on your learning patterns
+                    This plan is optimized based on your learning patterns and class schedule
                   </span>
                 </div>
               </CardContent>
@@ -599,6 +604,7 @@ export default function TimetablePage() {
         )}
       </AnimatePresence>
 
+      {/* Study Groups Section */}
       <AnimatePresence>
         {showStudyGroups && (
           <motion.div
