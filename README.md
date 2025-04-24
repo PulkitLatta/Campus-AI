@@ -72,6 +72,7 @@ Built with modern web technologies and powered by OpenAI, CampusAI makes it easy
 ## Setup Instructions
 
 ```bash
+git clone https://github.com/PulkitLatta/Campus-AI.git
 npm install
 npm run dev
 ```
